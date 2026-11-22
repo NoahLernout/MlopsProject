@@ -1,0 +1,10 @@
+data/
+data_upload/
+archive.zip
+inference/model/
+__pycache__/
+*.db
+.venv/
+_to_delete/
+report/*.txt
+Used_Car_MLOps_source.zip

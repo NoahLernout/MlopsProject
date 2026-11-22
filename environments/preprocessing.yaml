@@ -1,0 +1,7 @@
+$schema: https://azuremlschemas.azureedge.net/latest/environment.schema.json
+name: aml-carprice-prep
+version: 0.1.0
+description: Environment for data preparation (pandas, scikit-learn)
+conda_file: ../components/prep/conda.yaml
+image: mcr.microsoft.com/azureml/openmpi5.0-ubuntu24.04:latest
+os_type: linux

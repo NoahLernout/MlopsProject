@@ -1,0 +1,37 @@
+$schema: https://azuremlschemas.azureedge.net/latest/pipelineJob.schema.json
+type: pipeline
+name: used-car-price-pipeline
+display_name: Used car price pipeline
+experiment_name: used-car-price
+
+inputs:
+  raw_data:
+    type: uri_folder
+    path: azureml:used-car-data@latest
+  test_size: 0.2
+  min_r2: 0.85
+
+outputs:
+  model:
+    type: uri_folder
+    mode: upload
+
+settings:
+  default_compute: azureml:cpu-cluster
+
+jobs:
+  prep:
+    type: command
+    component: ../components/prep/prep.yaml
+    inputs:
+      data: ${{parent.inputs.raw_data}}
+      test_size: ${{parent.inputs.test_size}}
+  train:
+    type: command
+    component: ../components/train/train.yaml
+    inputs:
+      train_data: ${{parent.jobs.prep.outputs.train_data}}
+      test_data: ${{parent.jobs.prep.outputs.test_data}}
+      min_r2: ${{parent.inputs.min_r2}}
+    outputs:
+      model_output: ${{parent.outputs.model}}

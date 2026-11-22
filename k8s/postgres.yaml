@@ -1,0 +1,72 @@
+# PostgreSQL with a PersistentVolumeClaim: predictions survive pod restarts.
+apiVersion: v1
+kind: Secret
+metadata:
+  name: postgres-credentials
+  namespace: used-car
+type: Opaque
+stringData:            # demo values only; use a real secret store in production
+  POSTGRES_USER: carapi
+  POSTGRES_PASSWORD: carapi
+  POSTGRES_DB: predictions
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: postgres-data
+  namespace: used-car
+spec:
+  accessModes: ["ReadWriteOnce"]
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres
+  namespace: used-car
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels: {app: postgres}
+  template:
+    metadata:
+      labels: {app: postgres}
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:16-alpine
+          ports:
+            - containerPort: 5432
+          envFrom:
+            - secretRef: {name: postgres-credentials}
+          env:
+            - name: PGDATA
+              value: /var/lib/postgresql/data/pgdata
+          readinessProbe:
+            exec:
+              command: ["pg_isready", "-U", "carapi", "-d", "predictions"]
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          resources:
+            requests: {cpu: 50m, memory: 128Mi}
+            limits: {memory: 256Mi}
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/postgresql/data
+      volumes:
+        - name: data
+          persistentVolumeClaim: {claimName: postgres-data}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres
+  namespace: used-car
+spec:
+  selector: {app: postgres}
+  ports:
+    - port: 5432

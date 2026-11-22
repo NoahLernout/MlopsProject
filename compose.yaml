@@ -1,0 +1,31 @@
+# Local run of the API + PostgreSQL:  docker compose up --build
+services:
+  api:
+    build:
+      context: ./inference
+      args:
+        GIT_SHA: local
+        IMAGE_TAG: local
+    image: used-car-api:local
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: postgresql+psycopg2://carapi:carapi@db:5432/predictions
+    depends_on:
+      db:
+        condition: service_healthy
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: carapi
+      POSTGRES_PASSWORD: carapi
+      POSTGRES_DB: predictions
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U carapi -d predictions"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+volumes:
+  pgdata:

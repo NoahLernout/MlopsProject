@@ -1,0 +1,37 @@
+$schema: https://azuremlschemas.azureedge.net/latest/commandComponent.schema.json
+name: carprice_train
+version: 0.1.0
+display_name: Train and compare car price models
+description: Trains several regression models, logs them to MLflow, applies a quality gate and registers the best one.
+type: command
+is_deterministic: false
+
+environment: azureml:aml-carprice-train:0.1.0
+resources:
+  instance_count: 1
+
+code: ./code
+command: >-
+  python train.py
+  --train_data ${{inputs.train_data}}
+  --test_data ${{inputs.test_data}}
+  --min_r2 ${{inputs.min_r2}}
+  --registered_model_name ${{inputs.registered_model_name}}
+  --model_output ${{outputs.model_output}}
+
+inputs:
+  train_data:
+    type: uri_folder
+    optional: false
+  test_data:
+    type: uri_folder
+    optional: false
+  min_r2:
+    type: number
+    default: 0.85
+  registered_model_name:
+    type: string
+    default: used-car-price
+outputs:
+  model_output:
+    type: uri_folder

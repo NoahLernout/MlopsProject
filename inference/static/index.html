@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CarWorth - used car price estimator</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%232563eb'/%3E%3Cpath d='M14 38l5-12c1-2 3-3 5-3h16c2 0 4 1 5 3l5 12v8h-6v-4H20v4h-6z' fill='white'/%3E%3C/svg%3E">
+<style>
+:root{
+  --bg:#f4f6fb; --card:#ffffff; --ink:#0f172a; --muted:#64748b; --line:#e2e8f0;
+  --brand:#2563eb; --brand-2:#7c3aed; --good:#16a34a; --warn:#d97706; --bad:#dc2626;
+  --shadow:0 1px 2px rgba(15,23,42,.06),0 8px 30px rgba(15,23,42,.08); --radius:18px;
+}
+[data-theme="dark"]{
+  --bg:#0b1020; --card:#131a2e; --ink:#e8ecf6; --muted:#93a0bd; --line:#26304a;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 40px rgba(0,0,0,.35);
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;background:var(--bg);color:var(--ink);
+  background-image:radial-gradient(900px 400px at 85% -10%,rgba(124,58,237,.14),transparent),radial-gradient(800px 400px at -5% -10%,rgba(37,99,235,.16),transparent);
+  background-attachment:fixed;min-height:100vh}
+.wrap{max-width:1120px;margin:0 auto;padding:22px 20px 60px}
+header{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:26px;flex-wrap:wrap}
+.logo{display:flex;align-items:center;gap:12px}
+.logo .mark{width:42px;height:42px;border-radius:12px;background:linear-gradient(135deg,var(--brand),var(--brand-2));display:grid;place-items:center;box-shadow:0 6px 18px rgba(37,99,235,.35)}
+.logo h1{font-size:20px;margin:0;letter-spacing:-.02em}
+.logo small{display:block;color:var(--muted);font-size:12px;margin-top:1px}
+.tools{display:flex;align-items:center;gap:10px}
+.pill{display:inline-flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:7px 13px;font-size:12.5px;color:var(--muted);box-shadow:var(--shadow)}
+.dot{width:8px;height:8px;border-radius:50%;background:#94a3b8}
+.dot.ok{background:var(--good);box-shadow:0 0 0 4px rgba(22,163,74,.18)}
+.dot.bad{background:var(--bad);box-shadow:0 0 0 4px rgba(220,38,38,.18)}
+button{font:inherit;cursor:pointer}
+.icon-btn{width:38px;height:38px;border-radius:50%;border:1px solid var(--line);background:var(--card);color:var(--ink);display:grid;place-items:center;box-shadow:var(--shadow)}
+.grid{display:grid;grid-template-columns:1.05fr .95fr;gap:22px}
+@media(max-width:900px){.grid{grid-template-columns:1fr}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:24px}
+.card h2{margin:0 0 4px;font-size:17px;letter-spacing:-.01em}
+.card .sub{color:var(--muted);font-size:13px;margin:0 0 18px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:520px){.row{grid-template-columns:1fr}}
+.field{margin-bottom:16px}
+label{display:flex;justify-content:space-between;align-items:baseline;font-size:12.5px;font-weight:600;color:var(--muted);margin-bottom:7px;text-transform:uppercase;letter-spacing:.04em}
+label output{color:var(--ink);font-size:14px;text-transform:none;letter-spacing:0;font-variant-numeric:tabular-nums}
+select,input[type=number]{width:100%;padding:11px 12px;border-radius:12px;border:1px solid var(--line);background:var(--bg);color:var(--ink);font:inherit;font-size:14.5px;outline:none;transition:border .15s,box-shadow .15s}
+select:focus,input[type=number]:focus{border-color:var(--brand);box-shadow:0 0 0 4px rgba(37,99,235,.15)}
+input[type=range]{width:100%;accent-color:var(--brand);height:22px}
+.seg{display:flex;flex-wrap:wrap;gap:8px}
+.seg button{padding:8px 14px;border-radius:999px;border:1px solid var(--line);background:var(--bg);color:var(--ink);font-size:13.5px;transition:all .15s}
+.seg button:hover{border-color:var(--brand)}
+.seg button.on{background:var(--brand);border-color:var(--brand);color:#fff;box-shadow:0 4px 14px rgba(37,99,235,.35)}
+.cta{width:100%;padding:14px 18px;border:0;border-radius:14px;background:linear-gradient(135deg,var(--brand),var(--brand-2));color:#fff;font-weight:700;font-size:15.5px;box-shadow:0 10px 24px rgba(37,99,235,.35);transition:transform .1s,filter .15s}
+.cta:hover{filter:brightness(1.07)}.cta:active{transform:translateY(1px)}
+.cta[disabled]{opacity:.6;cursor:wait}
+.presets{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}
+.chip{border:1px dashed var(--line);background:transparent;color:var(--muted);border-radius:999px;padding:6px 12px;font-size:12.5px}
+.chip:hover{color:var(--brand);border-color:var(--brand)}
+.result{text-align:center;padding:26px 10px 10px}
+.result .label{color:var(--muted);font-size:13px;text-transform:uppercase;letter-spacing:.08em}
+.price{font-size:58px;font-weight:800;letter-spacing:-.04em;margin:6px 0 2px;background:linear-gradient(135deg,var(--brand),var(--brand-2));-webkit-background-clip:text;background-clip:text;color:transparent;font-variant-numeric:tabular-nums}
+.car-name{font-weight:600;font-size:16px}
+.range{margin:22px auto 6px;max-width:380px}
+.bar{position:relative;height:10px;border-radius:999px;background:linear-gradient(90deg,rgba(37,99,235,.15),rgba(124,58,237,.25),rgba(37,99,235,.15))}
+.bar i{position:absolute;top:-5px;width:20px;height:20px;border-radius:50%;background:#fff;border:4px solid var(--brand);transform:translateX(-50%);left:50%;box-shadow:0 4px 12px rgba(37,99,235,.4)}
+.range-labels{display:flex;justify-content:space-between;font-size:12.5px;color:var(--muted);margin-top:10px;font-variant-numeric:tabular-nums}
+.hint{color:var(--muted);font-size:12.5px;margin-top:14px}
+.empty{color:var(--muted);padding:40px 10px;text-align:center}
+.empty svg{opacity:.5;margin-bottom:8px}
+.err{background:rgba(220,38,38,.09);border:1px solid rgba(220,38,38,.3);color:var(--bad);border-radius:12px;padding:12px 14px;font-size:13.5px;margin-top:14px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:20px}
+.stat{background:var(--bg);border:1px solid var(--line);border-radius:14px;padding:12px;text-align:center}
+.stat b{display:block;font-size:18px;font-variant-numeric:tabular-nums}
+.stat span{font-size:11.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.hist{margin-top:22px}
+.hist h3{margin:0 0 10px;font-size:14px}
+.hist ul{list-style:none;margin:0;padding:0}
+.hist li{display:flex;justify-content:space-between;gap:10px;padding:10px 4px;border-bottom:1px solid var(--line);font-size:13.5px;cursor:pointer;border-radius:8px}
+.hist li:hover{background:var(--bg)}
+.hist li span{color:var(--muted);font-size:12px}
+.hist li b{font-variant-numeric:tabular-nums}
+footer{margin-top:26px;text-align:center;color:var(--muted);font-size:12.5px}
+footer a{color:var(--brand);text-decoration:none}
+.pop{animation:pop .5s cubic-bezier(.2,1.4,.4,1)}
+@keyframes pop{0%{transform:scale(.92);opacity:.3}100%{transform:scale(1);opacity:1}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo">
+      <div class="mark"><svg width="24" height="24" viewBox="0 0 64 64"><path d="M10 38l6-14c1-3 3-4 6-4h20c3 0 5 1 6 4l6 14v10h-7v-5H17v5h-7z" fill="#fff"/><circle cx="21" cy="36" r="3" fill="#2563eb"/><circle cx="43" cy="36" r="3" fill="#2563eb"/></svg></div>
+      <div><h1>CarWorth</h1><small>Used-car price estimator for the UK market</small></div>
+    </div>
+    <div class="tools">
+      <span class="pill" id="statusPill"><span class="dot" id="dot"></span><span id="statusText">connecting...</span></span>
+      <a class="pill" href="/docs" style="text-decoration:none">API docs</a>
+      <button class="icon-btn" id="theme" title="Toggle theme" aria-label="Toggle theme">&#9680;</button>
+    </div>
+  </header>
+
+  <div class="grid">
+    <section class="card">
+      <h2>Describe the car</h2>
+      <p class="sub">Pick the details of the car you want to value.</p>
+      <div class="presets" id="presets"></div>
+      <form id="form" autocomplete="off">
+        <div class="row">
+          <div class="field"><label for="brand">Brand</label><select id="brand"></select></div>
+          <div class="field"><label for="model">Model</label><select id="model"></select></div>
+        </div>
+        <div class="field"><label for="year">Year <output id="yearOut"></output></label><input type="range" id="year"></div>
+        <div class="field"><label for="mileage">Mileage <output id="mileageOut"></output></label><input type="range" id="mileage" min="0" max="150000" step="1000"></div>
+        <div class="field"><label>Transmission</label><div class="seg" id="transmission"></div></div>
+        <div class="field"><label>Fuel type</label><div class="seg" id="fuel"></div></div>
+        <div class="field"><label for="engine">Engine size <output id="engineOut"></output></label><input type="range" id="engine" min="0.6" max="5" step="0.1"></div>
+        <div class="row">
+          <div class="field"><label for="tax">Road tax (&pound;/year)</label><input type="number" id="tax" min="0" max="1000" step="5"></div>
+          <div class="field"><label for="mpg">Fuel economy (mpg)</label><input type="number" id="mpg" min="5" max="300" step="0.1"></div>
+        </div>
+        <button class="cta" id="go" type="submit">Estimate price</button>
+        <div id="error"></div>
+      </form>
+    </section>
+
+    <section class="card">
+      <h2>Estimated value</h2>
+      <p class="sub">Based on a model trained on ~97,000 UK listings.</p>
+      <div id="resultBox">
+        <div class="empty">
+          <svg width="56" height="56" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M10 40l6-14c1-3 3-4 6-4h20c3 0 5 1 6 4l6 14v10h-7v-5H17v5h-7z"/><circle cx="21" cy="38" r="2"/><circle cx="43" cy="38" r="2"/></svg>
+          <div>Fill in the form and press <b>Estimate price</b>.</div>
+        </div>
+      </div>
+      <div class="stats" id="stats"></div>
+      <div class="hist"><h3>Recent estimates</h3><ul id="history"><li style="cursor:default"><span>No estimates yet</span></li></ul></div>
+    </section>
+  </div>
+
+  <footer>Model trained in Azure ML &middot; served with FastAPI on Kubernetes &middot; <span id="ver"></span></footer>
+</div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const NICE = {vw:"Volkswagen", merc:"Mercedes-Benz", bmw:"BMW", audi:"Audi", ford:"Ford", hyundai:"Hyundai", skoda:"Skoda", toyota:"Toyota", vauxhall:"Vauxhall"};
+const brandName = (b) => NICE[b] || b[0].toUpperCase() + b.slice(1);
+const gbp = (n) => new Intl.NumberFormat("en-GB", {style:"currency", currency:"GBP", maximumFractionDigits:0}).format(n);
+const miles = (n) => new Intl.NumberFormat("en-GB").format(n) + " mi";
+let opts = null, info = null, trans = "Manual", fuel = "Petrol";
+
+// theme
+const savedTheme = (() => { try { return localStorage.getItem("theme"); } catch (e) { return null; } })();
+if (savedTheme) document.documentElement.dataset.theme = savedTheme;
+else if (matchMedia("(prefers-color-scheme: dark)").matches) document.documentElement.dataset.theme = "dark";
+$("theme").onclick = () => {
+  const t = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
+  document.documentElement.dataset.theme = t;
+  try { localStorage.setItem("theme", t); } catch (e) {}
+};
+
+function seg(container, values, current, onPick) {
+  container.innerHTML = "";
+  values.forEach((v) => {
+    const b = document.createElement("button");
+    b.type = "button"; b.textContent = v; b.className = v === current ? "on" : "";
+    b.onclick = () => { [...container.children].forEach((c) => c.classList.remove("on")); b.classList.add("on"); onPick(v); };
+    container.appendChild(b);
+  });
+}
+function setSeg(container, value) { [...container.children].forEach((c) => c.classList.toggle("on", c.textContent === value)); }
+
+function fillModels(keep) {
+  const list = opts.models_by_brand[$("brand").value] || [];
+  $("model").innerHTML = list.map((m) => `<option>${m.trim()}</option>`).join("");
+  if (keep && list.includes(keep)) $("model").value = keep;
+}
+function syncOutputs() {
+  $("yearOut").textContent = $("year").value;
+  $("mileageOut").textContent = miles(+$("mileage").value);
+  $("engineOut").textContent = (+$("engine").value).toFixed(1) + " L";
+}
+["year", "mileage", "engine"].forEach((id) => $(id).addEventListener("input", syncOutputs));
+$("brand").addEventListener("change", () => fillModels());
+
+const PRESETS = [
+  {name:"Family hatchback", v:{brand:"vw", model:"Golf", year:2018, mileage:30000, transmission:"Manual", fuel:"Petrol", engine:1.4, tax:145, mpg:55}},
+  {name:"Premium estate", v:{brand:"bmw", model:"3 Series", year:2017, mileage:45000, transmission:"Automatic", fuel:"Diesel", engine:2.0, tax:30, mpg:60}},
+  {name:"City car", v:{brand:"ford", model:"Fiesta", year:2016, mileage:35000, transmission:"Manual", fuel:"Petrol", engine:1.0, tax:20, mpg:65}},
+  {name:"Hybrid SUV", v:{brand:"toyota", model:"RAV4", year:2019, mileage:20000, transmission:"Automatic", fuel:"Hybrid", engine:2.5, tax:135, mpg:50}},
+];
+function apply(v) {
+  if (!opts.brands.includes(v.brand)) return;
+  $("brand").value = v.brand; fillModels();
+  const mdl = (opts.models_by_brand[v.brand] || []).find((m) => m.trim() === v.model);
+  if (mdl) $("model").value = mdl.trim();
+  $("year").value = v.year; $("mileage").value = v.mileage; $("engine").value = v.engine;
+  $("tax").value = v.tax; $("mpg").value = v.mpg;
+  trans = v.transmission; fuel = v.fuel; setSeg($("transmission"), trans); setSeg($("fuel"), fuel);
+  syncOutputs();
+}
+
+async function api(path, body) {
+  const r = await fetch(path, body ? {method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify(body)} : undefined);
+  const data = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(typeof data.detail === "string" ? data.detail : (data.detail ? data.detail.map((d) => d.loc.slice(-1) + ": " + d.msg).join("; ") : "Request failed (" + r.status + ")"));
+  return data;
+}
+
+function showStats() {
+  if (!info) return;
+  const m = info.metrics;
+  $("stats").innerHTML =
+    `<div class="stat"><b>${(m.r2 * 100).toFixed(1)}%</b><span>Accuracy (R&sup2;)</span></div>` +
+    `<div class="stat"><b>&plusmn;${gbp(m.mae)}</b><span>Typical error</span></div>` +
+    `<div class="stat"><b>${info.algorithm.replace(/_/g, " ")}</b><span>Model</span></div>`;
+  $("ver").textContent = "build " + String(info.image_tag).slice(0, 7);
+}
+
+function showResult(res, v) {
+  const mae = info ? info.metrics.mae : 1000;
+  const lo = Math.max(0, res.estimated_price - mae), hi = res.estimated_price + mae;
+  $("resultBox").innerHTML = `
+    <div class="result pop">
+      <div class="label">Estimated asking price</div>
+      <div class="price" id="priceNum">${gbp(res.estimated_price)}</div>
+      <div class="car-name">${brandName(v.brand)} ${v.model} &middot; ${v.year}</div>
+      <div class="range"><div class="bar"><i></i></div>
+        <div class="range-labels"><span>${gbp(lo)}</span><span>likely range</span><span>${gbp(hi)}</span></div></div>
+      <div class="hint">Estimate #${res.prediction_id} saved. The range is the model's average error on unseen cars.</div>
+    </div>`;
+  // count-up animation
+  const el = $("priceNum"), end = res.estimated_price, t0 = performance.now();
+  (function tick(t) { const k = Math.min(1, (t - t0) / 700), e = 1 - Math.pow(1 - k, 3); el.textContent = gbp(end * e); if (k < 1) requestAnimationFrame(tick); })(t0);
+}
+
+async function loadHistory() {
+  try {
+    const rows = await api("/predictions?limit=6");
+    $("history").innerHTML = rows.length ? rows.map((r) =>
+      `<li data-i='${JSON.stringify({brand:r.brand, model:r.model, year:r.year, mileage:r.mileage})}'><div>${brandName(r.brand)} ${r.model}<br><span>${r.year} &middot; ${miles(r.mileage)}</span></div><b>${gbp(r.predicted_price)}</b></li>`).join("")
+      : '<li style="cursor:default"><span>No estimates yet</span></li>';
+    document.querySelectorAll("#history li[data-i]").forEach((li) => li.onclick = () => {
+      const d = JSON.parse(li.dataset.i); $("brand").value = d.brand; fillModels(d.model.trim());
+      $("year").value = d.year; $("mileage").value = Math.min(150000, d.mileage); syncOutputs(); scrollTo({top:0, behavior:"smooth"});
+    });
+  } catch (e) {}
+}
+
+$("form").addEventListener("submit", async (ev) => {
+  ev.preventDefault(); $("error").innerHTML = ""; $("go").disabled = true; $("go").textContent = "Estimating...";
+  const v = {brand:$("brand").value, model:$("model").value, year:+$("year").value, mileage:+$("mileage").value};
+  try {
+    const res = await api("/predict", {brand:v.brand, model:v.model, year:v.year, transmission:trans, mileage:v.mileage,
+      fuel_type:fuel, tax:+$("tax").value, mpg:+$("mpg").value, engine_size:+$("engine").value});
+    showResult(res, v); loadHistory();
+  } catch (e) { $("error").innerHTML = `<div class="err">${e.message}</div>`; }
+  finally { $("go").disabled = false; $("go").textContent = "Estimate price"; }
+});
+
+async function init() {
+  try {
+    const [h, o, i] = await Promise.all([api("/health"), api("/options"), api("/version")]);
+    opts = o; info = i;
+    $("dot").className = "dot ok"; $("statusText").textContent = h.model_loaded ? "API online" : "model not loaded";
+    $("brand").innerHTML = opts.brands.map((b) => `<option value="${b}">${brandName(b)}</option>`).join("");
+    const [y0, y1] = opts.year_range; $("year").min = y0; $("year").max = y1;
+    seg($("transmission"), opts.transmissions, trans, (v) => trans = v);
+    seg($("fuel"), opts.fuel_types, fuel, (v) => fuel = v);
+    $("presets").innerHTML = PRESETS.map((p, k) => `<button type="button" class="chip" data-k="${k}">${p.name}</button>`).join("");
+    document.querySelectorAll(".chip").forEach((c) => c.onclick = () => apply(PRESETS[+c.dataset.k].v));
+    apply(PRESETS[0].v); showStats(); loadHistory();
+  } catch (e) {
+    $("dot").className = "dot bad"; $("statusText").textContent = "API offline";
+    $("error").innerHTML = `<div class="err">Could not reach the API: ${e.message}</div>`;
+  }
+}
+init();
+</script>
+</body>
+</html>

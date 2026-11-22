@@ -1,0 +1,36 @@
+$schema: https://azuremlschemas.azureedge.net/latest/commandComponent.schema.json
+name: carprice_data_prep
+version: 0.1.0
+display_name: Car price data preparation
+description: Merges the per-brand used car CSV files, cleans them and splits train/test.
+type: command
+is_deterministic: true
+
+environment: azureml:aml-carprice-prep:0.1.0
+resources:
+  instance_count: 1
+
+code: ./code
+command: >-
+  python prep.py
+  --data ${{inputs.data}}
+  --test_size ${{inputs.test_size}}
+  --seed ${{inputs.seed}}
+  --train_output ${{outputs.train_data}}
+  --test_output ${{outputs.test_data}}
+
+inputs:
+  data:
+    type: uri_folder
+    optional: false
+  test_size:
+    type: number
+    default: 0.2
+  seed:
+    type: integer
+    default: 42
+outputs:
+  train_data:
+    type: uri_folder
+  test_data:
+    type: uri_folder
