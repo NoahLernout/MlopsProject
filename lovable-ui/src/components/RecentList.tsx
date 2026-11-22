@@ -1,0 +1,6 @@
+import { CarFront, History, ArrowUpRight } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { friendlyBrand, eur, km, type RecentPrediction } from '@/api';
+export function RecentList({ items, onSelect, mock }: { items: RecentPrediction[]; onSelect: (item: RecentPrediction) => void; mock: boolean }) {
+  return <section className="recent-section"><div className="recent-heading"><h2><History />Recent estimates</h2><span className="recent-count">{mock ? 'Demo history' : `${items.length} estimates`}</span></div>{items.length === 0 ? <p className="py-5 text-xs text-muted-foreground">Your first estimate will appear here.</p> : items.slice(0, 5).map(item => <Button key={item.id} variant="ghost" className="recent-item" onClick={() => onSelect(item)} aria-label={`Load ${friendlyBrand(item.brand)} ${item.model} ${item.year}`}><span className="flex items-center gap-3"><span className="recent-icon"><CarFront size={18} /></span><span><span className="recent-car">{friendlyBrand(item.brand)} {item.model}</span><span className="recent-details block">{item.year} <span className="mx-1">·</span> {km(item.mileage)}</span></span></span><span className="flex items-center gap-3"><span className="recent-price">{eur(item.estimated_price)}</span><ArrowUpRight className="!size-3 text-subtle" /></span></Button>)}</section>;
+}

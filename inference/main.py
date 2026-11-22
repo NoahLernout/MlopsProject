@@ -171,12 +171,14 @@ def list_predictions(limit: int = Query(20, ge=1, le=200)):
             {
                 "id": r.id, "created_at": r.created_at, "brand": r.brand, "model": r.model,
                 "year": r.year, "mileage": r.mileage, "predicted_price": r.predicted_price,
+                "estimated_price": r.predicted_price, "transmission": r.transmission,
+                "fuel_type": r.fuel_type, "tax": r.tax, "mpg": r.mpg, "engine_size": r.engine_size,
             }
             for r in rows
         ]
 
 
-# Web interface (plain HTML/JS, no build step) served by the same container
+# Web interface (React app built from lovable-ui, static files) served by the same container
 _static = os.path.join(os.path.dirname(os.path.abspath(__file__)), "static")
 if os.path.isdir(_static):
     app.mount("/ui", StaticFiles(directory=_static, html=True), name="ui")
